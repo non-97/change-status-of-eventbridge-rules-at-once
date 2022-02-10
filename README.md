@@ -1,14 +1,42 @@
-# Welcome to your CDK TypeScript project!
+# Change status of EventBridge Rules at once
 
-This is a blank project for TypeScript development with CDK.
+This is the State Machine that schedules the disabling and enabling of all EventBridge rules that match the name prefix.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+## Usage
 
-## Useful commands
+```bash
+git change-status-of-eventbridge-rules-at-once
 
- * `npm run build`   compile typescript to js
- * `npm run watch`   watch for changes and compile
- * `npm run test`    perform the jest unit tests
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk synth`       emits the synthesized CloudFormation template
+cd change-status-of-eventbridge-rules-at-once
+
+npm install
+
+npx cdk bootstrap
+
+npx cdk deploy
+```
+
+## Directory
+
+```bash
+.
+├── .gitignore
+├── .npmignore
+├── README.md
+├── bin
+│   └── change-status-of-eventbridge-rules-at-once.ts
+├── cdk.json
+├── jest.config.js
+├── lib
+│   └── change-status-of-eventbridge-rules-at-once-stack.ts
+├── package-lock.json
+├── package.json
+├── test
+│   └── change-status-of-eventbridge-rules-at-once.test.ts
+└── tsconfig.json
+```
+
+## Detailed Description
+
+- [[AWS Step Functions] 名前のプレフィックスに一致するEventBridgeルールを一定期間無効化もしくは有効化するステートマシンを作成してみた](https://dev.classmethod.jp/etc/change-status-of…ge-rules-at-once/)
+- [プレフィックスで一致したEventBridgeルールをまとめて無効化/有効化してみた](https://dev.classmethod.jp/articles/disable-or-enable-all-eventbridge-rules-that-match-by-name-prefix-at-once/)
