@@ -38,5 +38,5 @@ npx cdk deploy
 
 ## Detailed Description
 
-- [[AWS Step Functions] 名前のプレフィックスに一致するEventBridgeルールを一定期間無効化もしくは有効化するステートマシンを作成してみた](https://dev.classmethod.jp/articles/change-status-of-eventbridge-rules-at-once/)
+- [[AWS Step Functions] 名前のプレフィックスが一致するEventBridgeルールを一定期間無効化もしくは有効化するステートマシンを作成してみた](https://dev.classmethod.jp/articles/change-status-of-eventbridge-rules-at-once/)
 - [プレフィックスで一致したEventBridgeルールをまとめて無効化/有効化してみた](https://dev.classmethod.jp/articles/disable-or-enable-all-eventbridge-rules-that-match-by-name-prefix-at-once/)
