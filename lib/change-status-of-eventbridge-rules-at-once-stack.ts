@@ -67,12 +67,16 @@ export class ChangeStatusOfEventBridgeRulesAtOnceStack extends Stack {
     // ----------------------------------
 
     // Wait for a set time
-    const wait = new sfn.Wait(this, "Wait", {
-      time: sfn.WaitTime.secondsPath("$.WaitSeconds"),
+    const waitSeconds = new sfn.Wait(this, "WaitSeconds", {
+      time: sfn.WaitTime.secondsPath("$.WaitTime.Value"),
+    });
+
+    const waitTimestamp = new sfn.Wait(this, "WaitTimestamp", {
+      time: sfn.WaitTime.timestampPath("$.WaitTime.Value"),
     });
 
     // Get the list of EventBridge Rules
-    const listRule = new tasks.CallAwsService(this, "ListRules", {
+    const listRules = new tasks.CallAwsService(this, "ListRules", {
       service: "eventbridge",
       action: "listRules",
       parameters: {
@@ -117,6 +121,17 @@ export class ChangeStatusOfEventBridgeRulesAtOnceStack extends Stack {
     });
     disableRuleMap.iterator(disableRule);
 
+    // Whether to wait for the specified number of seconds or until the specified timestamp
+    const isTimestamp = new sfn.Choice(this, "isTimestamp")
+      .otherwise(waitSeconds)
+      .when(
+        sfn.Condition.booleanEquals(
+          "$$.Execution.Input.WaitTime.isTimestamp",
+          true
+        ),
+        waitTimestamp
+      );
+
     // Whether to enable or disable the EventBridge Rules
     const isEnableRules = new sfn.Choice(this, "isEnableRules")
       .otherwise(disableRuleMap)
@@ -125,12 +140,16 @@ export class ChangeStatusOfEventBridgeRulesAtOnceStack extends Stack {
         enableRuleMap
       );
 
+    waitSeconds.next(listRules);
+    waitTimestamp.next(listRules);
+    listRules.next(isEnableRules);
+
     //　State Machine to enable or disable EventBridge Rules
     const enableOrDisableEventBridgeRulesStateMachine = new sfn.StateMachine(
       this,
       "EnableOrDisableEventBridgeRulesStateMachine",
       {
-        definition: wait.next(listRule).next(isEnableRules),
+        definition: isTimestamp,
         logs: {
           destination: enableOrDisableEventBridgeRulesStateMachineLogGroup,
           level: sfn.LogLevel.ALL,
@@ -150,7 +169,7 @@ export class ChangeStatusOfEventBridgeRulesAtOnceStack extends Stack {
         stateMachine: enableOrDisableEventBridgeRulesStateMachine,
         input: sfn.TaskInput.fromObject({
           "EventBridgeRule.$": "$$.Execution.Input.EventBridgeRule",
-          "WaitSeconds.$": "$$.Execution.Input.EnableWaitSeconds",
+          "WaitTime.$": "$$.Execution.Input.EnableWaitTime",
           isEnableRules: true,
         }),
         integrationPattern: sfn.IntegrationPattern.RUN_JOB,
@@ -161,7 +180,7 @@ export class ChangeStatusOfEventBridgeRulesAtOnceStack extends Stack {
         stateMachine: enableOrDisableEventBridgeRulesStateMachine,
         input: sfn.TaskInput.fromObject({
           "EventBridgeRule.$": "$$.Execution.Input.EventBridgeRule",
-          "WaitSeconds.$": "$$.Execution.Input.DisableWaitSeconds",
+          "WaitTime.$": "$$.Execution.Input.DisableWaitTime",
           isEnableRules: false,
         }),
         integrationPattern: sfn.IntegrationPattern.RUN_JOB,
